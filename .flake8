@@ -1,0 +1,7 @@
+[flake8]
+# Columnar alignment of assignments, arguments and comments is house style
+max-line-length = 120
+ignore = E126,E231,E262,E741,E201,E202,E203,E221,E222,E226,E241,E251,E265,E266,E127,E128,E131,W503,W504
+# The retained ISO 7730 formulas and BASIC listings in the fanger docstring are long
+per-file-ignores = hydronic/comfort.py:E501
+exclude = .git,__pycache__,build,dist,*.egg-info,.nix-*

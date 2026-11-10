@@ -1,0 +1,53 @@
+[build-system]
+requires                = ["setuptools >= 77", "wheel"]
+build-backend           = "setuptools.build_meta"
+
+[project]
+name                    = "pyhydronic"
+dynamic                 = ["version"]
+description             = "Heat flow through structures, and Fanger's thermal comfort (PMV/PPD) equation"
+readme                  = {file = "README.org", content-type = "text/plain"}
+requires-python         = ">=2.7"
+license                 = "GPL-3.0-or-later OR LicenseRef-Proprietary"
+license-files           = ["LICENSE", "COPYING"]
+authors                 = [
+    { name = "Perry Kundert", email = "perry@dominionrnd.com" },
+]
+keywords                = ["hydronic", "radiant", "heating", "thermostat", "comfort", "Fanger", "PMV", "PPD",
+                           "ISO 7730", "heat flow", "mean radiant temperature"]
+classifiers             = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Topic :: Home Automation",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies            = []
+
+[project.optional-dependencies]
+tests                   = ["pytest >= 4.6", "flake8"]
+dev                     = ["build", "setuptools >= 77", "wheel"]
+
+[project.urls]
+Homepage                = "https://github.com/pjkundert/pyhydronic"
+"Bug Tracker"           = "https://github.com/pjkundert/pyhydronic/issues"
+"Commercial Support"    = "https://dominionrnd.com/products/hydronic-comfort"
+
+[tool.setuptools]
+packages                = ["hydronic"]
+
+[tool.setuptools.dynamic]
+version                 = {attr = "hydronic.version.__version__"}
+
+# Pure Python, compatible with 2.7 and 3: tag the wheel py2.py3, so pip installs it under either
+[tool.distutils.bdist_wheel]
+python-tag              = "py2.py3"
+
+[tool.pytest.ini_options]
+testpaths               = ["tests"]

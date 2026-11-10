@@ -1,0 +1,22 @@
+Pyhydronic is distributed under the GNU General Public License version 3 (or
+later) and is also available under alternative licenses negotiated directly
+with Dominion Research & Development Corp.  If you obtained pyhydronic under the
+GPL, then the GPL applies to all pyhydronic modules used on your system as well.
+The GPL (version 3) is included in this source tree in the file COPYING.
+
+Dominion Research & Development Corp. holds copyright and/or sufficient licenses
+to all components of the pyhydronic package, and therefore can grant, at its
+sole discretion, the ability for companies, individuals, or organizations to
+create proprietary or Open Source (even if not GPL) products (eg. thermostats,
+controllers and building automation software) which may use at runtime the
+portions of pyhydronic which fall under our copyright/license umbrella.
+
+If you wish to use our code in other GPL programs, don't worry -- there is no
+requirement that you provide the same exception in your GPL'd products.
+
+If you have any questions regarding our licensing policy, please contact us:
+
++1.780.970.8148
+perry@dominionrnd.com
+Dominion Research & Development Corp.
+https://dominionrnd.com/products/hydronic-comfort

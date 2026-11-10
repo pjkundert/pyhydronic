@@ -1,0 +1,79 @@
+#+title: Pyhydronic: The Heat Flow Model
+#+OPTIONS: ^:nil toc:nil
+
+* Spaces, Portals and Environments
+
+  - =environment(temp, what)= :: A temperature (F) and a substance ('air', 'water', 'concrete',
+    'tile', 'wood', 'soil'), giving a thermal inertia (=BTU_ft3_F=, BTU per ft^3 per F).
+  - =space(name, (w,l,h), environment, now)= :: A named volume (ft) holding an environment.  Spaces
+    form a tree via =contains=; the root (usually 'world', the outdoors) is what you =compute=.
+    Names must be unique: portals refer to spaces by name.
+  - =portal(name, onto, (w,h), R, film=0.68)= :: A surface of a space, connecting it =onto= another
+    named space, with a core R value plus an inside air film.  Heat flows at =area / (R + film)=
+    BTU/h per F of difference.  Its inside surface temperature lies between the two spaces',
+    in proportion to the film's share of the total R.
+
+  Each time step:
+
+  #+BEGIN_SRC python
+  results = world.compute( now=now )      # BTU through every portal since the last step
+  results[('zone', 'boiler', 'supply')] = btu_added  # add any heat sources, keyed by space name
+  world.absorb( results )                 # update every space's temperature
+  #+END_SRC
+
+  =results= is keyed =(space, other, portal)=; each flow appears twice, once negated.  Any key whose
+  first element names a space adds that many BTU to it -- that's how boilers, solar gain, or
+  occupants are added.
+
+* Mean Radiant Temperature
+
+  =room.surfaces(world)= yields each surface bounding the room (its own portals, and other spaces'
+  portals onto it) with its temperature as seen from inside; =room.radiant(world)= is their
+  area-weighted mean.  That's the usual approximation of the view-factor weighted mean radiant
+  temperature an occupant sees, and is Fanger's =t_r= (once converted to C).
+
+  A few physical sensors (eg. outdoor, room air, slab) can be imposed on the model each step, by
+  overwriting the corresponding spaces' =conditions.temperature=; the model then estimates every
+  unmeasured surface -- a set of synthetic sensors.
+
+* Radiant Floors
+
+  A hydronic zone is modeled as layers, each a space, joined by portals (see [[file:examples/radiant_room.py][radiant_room.py]]):
+
+  #+BEGIN_EXAMPLE
+     room                  room
+     ------                ------  <-- portal R=0, film=~.5: the floor radiates at the tile temperature
+     room floor (tile)     ...     <-- a thin space of 'tile' (or 'wood') under each room
+     ------                ------  <-- tile and thinset, or flooring (R .25 - 2)
+     slab (concrete)               <-- one per zone; 'wood' for a subfloor over joists
+     ------                        <-- tubing depth in the slab (~R1)
+     zone (water)                  <-- the PEX tubing's water; heat is added here
+     ------                        <-- under-slab insulation, or the joist space below
+     ground
+  #+END_EXAMPLE
+
+  A portal with =R=0= and a non-zero film has an inside surface temperature equal to the other
+  side's: right for a thermal mass radiating from its own surface, with the film resisting only
+  convection.
+
+* Time Steps
+
+  =compute= integrates explicitly (forward Euler).  A space with heat capacity =C= (inertia x
+  volume, BTU/F) connected by conductance =G= (sum of area/R over its portals, BTU/h.F) is only
+  stable for steps much shorter than its time constant:
+
+  #+BEGIN_EXAMPLE
+  dt  <<  3600 x C / G   seconds
+  #+END_EXAMPLE
+
+  Thin layers with low R (tile over slab), small water volumes, and the air of a room have the
+  shortest time constants -- often only a few minutes.  Steps of about a minute suit typical
+  buildings; a step that's too long shows up as temperatures overshooting their neighbours, and
+  oscillating.  For example, a 12x14 room's air alone, losing 2,200 BTU/h, falls below the outdoor
+  temperature if advanced in a single 1 hour step.
+
+* Units
+
+  Temperatures in F, dimensions in ft, heat in BTU, R in F.ft^2.h/BTU (US R values) -- matching
+  North American building material data.  =C_to_F=, =F_to_C=, =ft(feet, inches)=, =ft_per_m= convert.
+  The comfort model (=fanger=) uses SI units: C, m/s, Pa.

@@ -1,0 +1,90 @@
+#+title: Pyhydronic: Heat Flow and Thermal Comfort
+#+author: Perry Kundert
+#+email: perry@dominionrnd.com
+#+OPTIONS: ^:nil toc:nil
+
+* Pyhydronic
+
+  Thermostats measure the wrong thing.  People don't feel the air temperature; they feel the heat
+  they lose -- by convection to the air, and by radiation to every surface around them.  A room at
+  21C with a wall of cold windows feels cool; the same room over a warm radiant floor feels warm.
+
+  Pyhydronic (=import hydronic=) computes both halves of that:
+
+  - =hydronic.heat= :: Heat flow between interconnected /spaces/ (rooms, slabs, hydronic zones, the
+    ground, the outdoors) through /portals/ (walls, windows, floors) of some area and R value.  This
+    estimates every surface's temperature, and hence each room's mean radiant temperature.
+  - =hydronic.comfort= :: Fanger's comfort equation (ISO 7730): the Predicted Mean Vote (PMV) and
+    Predicted Percentage Dissatisfied (PPD) for any air and radiant temperature, humidity, air
+    speed, clothing and activity -- and the air temperature =setpoint= yielding neutral comfort.
+
+  Pure Python with no dependencies, for Python 2.7 and 3.  It has controlled a multi-zone hydronic
+  radiant slab home for over a decade.
+
+* Install
+
+  #+BEGIN_EXAMPLE
+  python3 -m pip install pyhydronic      # or: python2 -m pip install pyhydronic
+  #+END_EXAMPLE
+
+  For Python 2 systems without access to PyPI, use the source; eg. as a git submodule:
+
+  #+BEGIN_EXAMPLE
+  git submodule add https://github.com/pjkundert/pyhydronic.git pyhydronic
+  ln -s pyhydronic/hydronic hydronic     # or add pyhydronic/ to PYTHONPATH
+  #+END_EXAMPLE
+
+* Use
+
+  How comfortable is a room with 21C air, if cold windows drag its mean radiant temperature (t_r)
+  down to 17C?  What air temperature would make it comfortable?
+
+  #+BEGIN_SRC python
+  from hydronic import fanger
+
+  f = fanger( clo=1.0, met=1.2, hum=0.4 )  # winter clothes, sitting/standing, 40% RH
+  f.PMV( t_a=21, t_r=21 )                  # -0.24: neutral
+  f.PMV( t_a=21, t_r=17 )                  # -0.64: slightly cool
+  f.PPD( t_a=21, t_r=17 )                  # 13.6% dissatisfied
+  f.setpoint( t_r=17 )                     # 26.9C air restores neutral comfort
+  f.setpoint( t_r=25 )                     # 19.8C suffices over a warm radiant floor
+  #+END_SRC
+
+  Where does t_r come from?  Model the room (US units: F, ft, R values), and ask:
+
+  #+BEGIN_SRC python
+  from hydronic import space, portal, environment, C_to_F, F_to_C, ft
+
+  world = space( 'world', ( 1e4, 1e4, 1e4 ), environment( C_to_F( -20 )), now=0 )
+  room  = space( 'room', ( ft(12), ft(14), ft(9) ), environment( C_to_F( 21 )), now=0 )
+  world.contains( room )
+  room.connects( portal( 'walls',   'world', ( ft(26), ft(9) ), R=20 ))
+  room.connects( portal( 'window',  'world', ( ft(8), ft(5) ),  R=2 ))
+  room.connects( portal( 'ceiling', 'world', room.size,         R=50 ))
+
+  F_to_C( room.radiant( world ))           # 19.1C: walls 19.7C, ceiling 20.4C, window 10.6C
+  world.absorb( world.compute( now=60 ))   # advance 1 minute; room loses ~36 BTU
+  #+END_SRC
+
+  The [[file:examples/][examples]] build a two room house on a radiant slab, and compare an air-temperature thermostat
+  against a comfort (PMV) thermostat; and reproduce the classic "comfort lines" of neutral air vs.
+  radiant temperature:
+
+  #+BEGIN_EXAMPLE
+  python examples/radiant_room.py --mode air        # sunroom air held at 21C, but PMV -0.3
+  python examples/radiant_room.py --mode comfort    # sunroom held at PMV ~0
+  python examples/comfort_lines.py
+  #+END_EXAMPLE
+
+* More
+
+  | [[file:README-model.org][README-model.org]]       | The heat flow model: spaces, portals, radiant floors, time steps |
+  | [[file:README-comfort.org][README-comfort.org]]     | Fanger's PMV / PPD: inputs, validation, caveats                  |
+  | [[file:README-development.org][README-development.org]] | Nix, make, testing under Python 2.7 and 3, releasing             |
+  | [[file:docs/README.org][docs/]]                  | Reference papers                                                 |
+
+* License and Commercial Support
+
+  Dual licensed: GPLv3 (or later), or a commercial license from Dominion Research & Development
+  Corp.; see [[file:LICENSE][LICENSE]].  We help thermostat, controller and building automation vendors put comfort
+  -- not just air temperature -- at the center of their products: [[https://dominionrnd.com/products/hydronic-comfort][dominionrnd.com]].

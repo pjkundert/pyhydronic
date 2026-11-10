@@ -1,0 +1,12 @@
+*~
+*.pyc
+__pycache__/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.nix-py2-bootstrap/
+result
+
+# ISO 7730 is a copyrighted (paid) standard; keep a local copy, but don't publish it.  See docs/README.org
+docs/ISO_7730_2005.pdf

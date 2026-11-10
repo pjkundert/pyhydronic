@@ -1,0 +1,52 @@
+#+title: Pyhydronic: Fanger's Comfort Equation
+#+OPTIONS: ^:nil toc:nil
+
+* Inputs
+
+  =fanger(...)= remembers any of these; each method accepts the same keywords to override them:
+
+  | Keyword       | Meaning                                    | Default | Typical            |
+  |---------------+--------------------------------------------+---------+--------------------|
+  | =met= or =M=  | Metabolism, met (or W/m^2; 1 met = 58 W/m^2) |     1.2 | 1.0 seated         |
+  | =clo= or =I_cl= | Clothing, clo (or m^2K/W; 1 clo = .155)    |     0.8 | 0.5 summer, 1 winter |
+  | =t_a=         | Air temperature, C                         |         |                    |
+  | =t_r=         | Mean radiant temperature, C                |         | see =space.radiant= |
+  | =v=           | Air velocity, m/s                          |     0.0 | <0.2 indoors       |
+  | =hum= or =P_w= | Relative humidity (0,1), or vapour pressure Pa |       | 0.3 - 0.6          |
+  | =W=           | External work, W/m^2                       |     0.0 |                    |
+  | =mit=         | Truong (2010)'s clothing area factor       |    True |                    |
+
+  A relative humidity tracks the air temperature of each computation (as when solving for a
+  =setpoint=); a vapour pressure is fixed.
+
+* Outputs
+
+  - =PMV()= :: Predicted Mean Vote, -3 (cold) to +3 (hot); 0 is neutral.  (=L()= is the original
+    name, and computes the same.)
+  - =PPD()= :: Predicted Percentage Dissatisfied: 5% at PMV 0, ~10% at +/-0.5, ~26% at +/-1.
+  - =setpoint(pmv=0, t_r=...)= :: The air temperature yielding the target PMV.  This is what a comfort
+    thermostat should target: warmer air near cold glass, cooler over a warm radiant floor.
+  - =feels()= :: cold, cool, coolish, ok, warmish, warm or hot.
+  - =clothing()=, =metabolism()= :: (amount, clo/met, description); pass an amount in (0,1) to adjust.
+  - =L_simple()= :: McIntyre's simplified perceived minus desired temperature (C), ignoring humidity.
+
+  ISO 7730 recommends PMV only within -2 to +2, and for: 0.8 to 4 met, 0 to 2 clo, t_a 10 to 30C,
+  t_r 10 to 40C, v 0 to 1 m/s, and P_w 0 to 2700 Pa.
+
+* Validation
+
+  [[file:tests/test_comfort.py][tests/test_comfort.py]] checks PMV to within 1% against the 14 cases tabulated in ISO 7730
+  (Annex D, Table D.1), and 8 more from a 2007 Green Building listserv discussion, both with
+  Fanger's original clothing area factor (=mit=False=) and Truong's revision (=mit=True=, the
+  default; it predicts lower (cooler) PMVs, increasingly so for heavier clothing).  The clothing
+  surface temperature is solved iteratively as in the ISO 7730 BASIC program, but iterates until
+  convergence ceases rather than a fixed count -- so PMV is reproducible to ~1e-4.
+
+  Note: =1 met = 58.0 W/m^2= here (=fanger.MET=); ISO 7730 uses 58.15 or 58.2.  The difference is
+  well within the validation tolerance.
+
+* Further Reading
+
+  The =fanger= class docstring retains the derivations, the ISO 7730 BASIC program, simplified and
+  adaptive comfort models (neutral temperature vs. outdoor temperature), and their sources.  The
+  key papers are in [[file:docs/README.org][docs/]].

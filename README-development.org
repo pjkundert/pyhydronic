@@ -1,0 +1,50 @@
+#+title: Pyhydronic: Development
+#+OPTIONS: ^:nil toc:nil
+
+* Environment
+
+  [[file:flake.nix][flake.nix]] provides Nix devShells with the build and test tooling (pyhydronic itself has no
+  dependencies): =default= (CPython 3.13), =py314=, =py313=, =py312=, =py311= and =py27=.  The
+  [[file:Makefile][Makefile]]'s =nix-<target>= runs any make target in one, selected by =TARGET=:
+
+  #+BEGIN_EXAMPLE
+  make nix-test                      # test under the default CPython 3
+  make TARGET=py312 nix-test         # ... or another
+  make TARGET=py27 nix-venv-test     # test under CPython 2.7, in a virtualenv
+  make nix-analyze                   # flake8
+  make nix-build                     # dist/pyhydronic-<version>.tar.gz and -py2.py3-none-any.whl
+  make nix-venv                      # an interactive shell in ../pyhydronic-<version>-<interpreter>/
+  #+END_EXAMPLE
+
+  Without Nix, any Python with pytest works: =make test=, or =python -m pytest=.  =make help= lists
+  all targets.
+
+* Python 2.7
+
+  The code is written for both (=from __future__ import division=, etc.), and the wheel is tagged
+  =py2.py3=, so =pip= installs it from PyPI under either.  Building the wheel requires Python 3.
+
+  Nix's Python 2.7 is flagged insecure (EOL), so it is built from source on first use.  The =py27=
+  devShell bootstraps =virtualenv= into =.nix-py2-bootstrap/=; =make venv= then creates a
+  virtualenv with =pytest < 5=, and tests run from the source tree.
+
+* Layout
+
+  #+BEGIN_EXAMPLE
+  hydronic/        the package: heat.py, comfort.py, misc.py, version.py
+  tests/           pytest; test_examples.py runs the examples
+  examples/        radiant_room.py, comfort_lines.py
+  docs/            reference papers (not in the sdist)
+  #+END_EXAMPLE
+
+* Releasing
+
+  Bump =hydronic/version.py=, commit, and push a matching tag:
+
+  #+BEGIN_EXAMPLE
+  git tag v2.0.0 && git push origin master v2.0.0
+  #+END_EXAMPLE
+
+  [[file:.github/workflows/release.yml][release.yml]] checks the tag matches the version, tests, builds, and publishes to PyPI (via
+  trusted publishing; the =pypi= environment).  [[file:.github/workflows/main.yml][main.yml]] tests every push under CPython 3.9 -
+  3.14, and the built wheel under CPython 2.7.

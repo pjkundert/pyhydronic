@@ -1,0 +1,6 @@
+# The sdist carries the tests and examples; the reference PDFs stay in the repository only
+include LICENSE COPYING README*.org Makefile flake.nix flake.lock .flake8
+recursive-include tests *.py
+recursive-include examples *.py
+prune docs
+global-exclude *~ *.pyc __pycache__

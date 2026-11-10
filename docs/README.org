@@ -1,0 +1,13 @@
+#+title: Pyhydronic: References
+#+OPTIONS: ^:nil toc:nil
+
+  | File / Source                                               | Notes                                                                 |
+  |-------------------------------------------------------------+-----------------------------------------------------------------------|
+  | [[file:NRC-IRC-RR-162-Fangers-thermal-comfort-and-draught-models.pdf][NRC-IRC-RR-162-...pdf]]                                       | Charles, K.E., "Fanger's Thermal Comfort and Draught Models", NRC    |
+  | [[https://doi.org/10.4224/20378865][doi.org/10.4224/20378865]]                                    | Research Report IRC-RR-162, 2003.  Applicability of PMV/PPD.          |
+  | [[file:TechnicalReview1982-2.pdf][TechnicalReview1982-2.pdf]]                                   | Bruel & Kjaer Technical Review No. 2, 1982, "Thermal Comfort".       |
+  | [[https://www.bksv.com/media/doc/TechnicalReview1982-2.pdf][bksv.com]]                                                    | Derivation of Fanger's equation (p. 3); comfort lines (p. 24).        |
+  | ISO 7730:2005 (not distributed; copyrighted)                | The standard: PMV, PPD, BASIC program, validation tables (Annex D).   |
+  | [[https://www.iso.org/standard/39155.html][iso.org/standard/39155]]                                      | Keep a local copy in docs/ISO_7730_2005.pdf (git-ignored).            |
+  | [[http://hdl.handle.net/1721.1/61509][hdl.handle.net/1721.1/61509]]                                 | Truong (2010), MIT: the revised clothing area factor (=mit=True=).    |
+  | Siegenthaler, "Modern Hydronic Heating"                     | Thermal capacities of materials (=BTU_ft3_F=).                        |
