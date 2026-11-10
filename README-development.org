@@ -46,5 +46,5 @@
   #+END_EXAMPLE
 
   [[file:.github/workflows/release.yml][release.yml]] checks the tag matches the version, tests, builds, and publishes to PyPI (via
-  trusted publishing; the =pypi= environment).  [[file:.github/workflows/main.yml][main.yml]] tests every push under CPython 3.9 -
+  trusted publishing; the =pypi= environment).  [[file:.github/workflows/main.yml][main.yml]] tests every push under CPython 3.10 -
   3.14, and the built wheel under CPython 2.7.
